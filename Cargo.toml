@@ -1,0 +1,20 @@
+[package]
+name = "ank"
+version = "0.1.0"
+edition = "2021"
+authors = ["Alexander Simonov <asimonov1998@gmail.com>"]
+description = "Yet another CLI system monitor"
+license = "MIT"
+repository = "https://github.com/simalei/ank"
+homepage = "https://github.com/simalei/ank"
+readme = "README.md"
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+anyhow = "1.0.75"
+better-panic = "0.3.0"
+clap = { version = "4.4.11", features = ["derive"] }
+crossbeam-channel = "0.5.9"
+crossterm = "0.27.0"
+psutil = "3.2.2"
+ratatui = "0.25.0"
