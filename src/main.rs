@@ -5,6 +5,8 @@ mod disk;
 mod ui;
 mod event;
 mod memory;
+mod marcos;
+mod process;
 
 use std::io::stdout;
 use std::time::Duration;
@@ -29,23 +31,27 @@ use crate::cli::Args;
 use crate::disk::DiskWidget;
 use crate::ui::ui;
 use crate::event::handle_events;
+use crate::memory::MemoryWidget;
+
+
 
 struct App {
     quit: bool,
     args: Args,
     cpu: CPUWidget,
-    disk: DiskWidget
+    disk: DiskWidget,
+    memory: MemoryWidget
 }
 
 
 impl App {
     fn new() -> Self {
-
         Self {
             quit: false,
             args: Args::parse(),
             cpu: CPUWidget::new(" CPU Usage "),
             disk: DiskWidget::new(),
+            memory: MemoryWidget::new(" Memory Usage ")
         }
     }
 }
@@ -92,7 +98,6 @@ fn main() -> Result<()> {
 
 
 
-    //app.cpu.update(&app.args)?;
     app.disk.update(&app.args)?;
 
     terminal.draw(|f| { ui(f, &mut app).unwrap(); })?;
@@ -105,7 +110,8 @@ fn main() -> Result<()> {
         select! {
             recv(update_recv) -> _ => {
                 app.cpu.update(&app.args)?;
-                //app.disk.update(&app.args)?;
+                app.disk.update(&app.args)?;
+                app.memory.update(&app.args)?;
             }
             recv(event_recv) -> event => {
                 handle_events(&mut app, event.unwrap());

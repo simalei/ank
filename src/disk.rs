@@ -1,16 +1,13 @@
-use std::fmt::{Display, format, Formatter};
-use std::path::Path;
 use ratatui::Frame;
 use ratatui::layout::{Constraint, Layout, Rect};
-use ratatui::widgets::{Block, Borders, Gauge, List, ListItem};
+use ratatui::widgets::{Block, Borders, Gauge};
 use crate::cli::Args;
 use crate::widget::Widget;
 use anyhow::Result;
 
 use psutil::disk::*;
 use ratatui::prelude::Direction;
-use ratatui::style::{Color, Style};
-
+use crate::{mb_or_gb, mb_or_gb_label};
 
 struct Disk {
     pub partition: Partition,
@@ -63,7 +60,7 @@ impl DiskWidget {
 }
 
 impl Widget for DiskWidget {
-    fn update(&mut self, args: &Args) -> Result<()> { // TODO: Figure out a way to update it, but not every second - that's too expensive
+    fn update(&mut self, _args: &Args) -> Result<()> { // TODO: Figure out a way to update it, but not every second - that's too expensive
         let mut disks: Vec<Disk> = vec![];
         for partition in partitions_physical().unwrap() {
             disks.push(Disk::new(partition));
@@ -79,9 +76,17 @@ impl Widget for DiskWidget {
 
         //let block = Block::new().title("Disk Usage");
 
+        let size_label = mb_or_gb_label!(args);
+
         for disk_num in 0..self.disk_count {
             let disk = &self.disks[disk_num as usize];
-            let label = format!("{} MB/{} MB ({:.2}% used)", disk.disk_usage.used() / 1_000_000 , disk.disk_usage.total() / 1_000_000, disk.disk_usage.percent() );
+
+
+            let label = format!("{} {size_label}/{} {size_label} ({:.2}% used)",
+                                mb_or_gb!(args, disk.disk_usage.used()),
+                                mb_or_gb!(args, disk.disk_usage.total()),
+                                disk.disk_usage.percent()
+            );
             let gauge = Gauge::default()
                 .label(label)
                 .block(Block::new().title(format!(" {} • {} • {} ",
